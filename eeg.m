@@ -34,7 +34,7 @@ nobytes = str2double(deblank(cellstr(char(fread(fid,8))'))) # Number of bytes in
 
 ver = cellstr(char(fread(fid,44))') # Version of data format
 
-nodata = str2double(deblank(cellstr(char(fread(fid,8))'))) # Number of data records "-1" if
+ndata = str2double(deblank(cellstr(char(fread(fid,8))'))) # Number of data records "-1" if
                                       # unknown
 
 dur = str2double(deblank(cellstr(char(fread(fid,8))'))) # Duration of a data record, in
@@ -45,4 +45,28 @@ N = str2double(deblank(cellstr(char(fread(fid,4))'))) # Number of channels (N) i
 
 chnl = cellstr(char(fread(fid,N*16))'); # Labels of the channels
 
+ttype = cellstr(char(fread(fid,N*80))'); # Transducer type
 
+pdim = cellstr(char(fread(fid,N*8))'); # Physical dimension of
+                                        # channels
+
+pmin = cellstr(char(fread(fid,N*8))'); # Physical minimum in units of
+                                        # physical dimension
+
+pmax = cellstr(char(fread(fid,N*8))'); # Physical maximum in units of
+                                       # physical dimension
+
+dmin = cellstr(char(fread(fid,N*8))'); # Digital minimum
+
+dmax = cellstr(char(fread(fid,N*8))'); # Digital maximum
+
+prefilter = cellstr(char(fread(fid,N*80))'); # Prefiltering
+
+cellstr(char(fread(fid,(N-1)*8'))'); # Number of samples in each
+          # data record (Sample-rate if Duration of data record = "1")
+
+nsamp = str2double(deblank(char(fread(fid,8'))'))
+
+reserved = cellstr(char(fread(fid,N*32))'); # Reserved
+
+data = fread(fid,[dur*nsamp,N])';
