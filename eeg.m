@@ -2,6 +2,8 @@ clear all, close all
 addpath('/home/justin/EEG/data/Multi-modal Face Dataset/EEG');
 addpath('/home/justin/EEG/functions');
 
+load('downsample.m')
+
 graphics_toolkit('gnuplot')
 
 fid = fopen('faces_run1.bdf');
@@ -65,11 +67,11 @@ for i = 1:N
 end
 
 for i = 1:N
-  chnl(i,6) = char(fread(fid,8))'; # Digital minimum
+  chnl(i,6) = str2double(deblank(char(fread(fid,8))')); # Digital minimum
 end
 
 for i = 1:N
-  chnl(i,7) = char(fread(fid,8))'; # Digital maximum
+  chnl(i,7) = str2double(deblank(char(fread(fid,8))')); # Digital maximum
 end
 
 for i = 1:N
@@ -77,7 +79,7 @@ for i = 1:N
 end
 
 for i = 1:N
-  chnl(i,9) = char(fread(fid,8))'; # Number of samples in each
+  chnl(i,9) = str2double(deblank(char(fread(fid,8))')); # Number of samples in each
           # data record (Sample-rate if Duration of data record = "1")
 end
 
@@ -85,4 +87,19 @@ for i = 1:N
   chnl(i,10) = char(fread(fid,32))'; # Reserved
 end
 
+nsamp = cellfun(@times,chnl(:,9),{dur}); # Number of samples for each
+                                # electrode; sample rate x duration
+
+## data = cell(N,nsamp);
+
+data = fread(fid,[nsamp(i),N])';
+
+## Downsampling of data
+data = downsample(data,nsamp,200);
+size(data)
+
+plot(data(1,:))
+
 ## data = fread(fid,[dur*nsamp,N])';
+
+fclose(fid);
