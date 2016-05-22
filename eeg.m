@@ -19,54 +19,70 @@ else
 end
 
 fseek(fid, 1, 'bof');
-id = cellstr(char(fread(fid,7))') # Identification code
+id = cellstr(char(fread(fid,7))'); # Identification code
 
-lsi = cellstr(char(fread(fid,80))') # Local subject identification
+lsi = cellstr(char(fread(fid,80))'); # Local subject identification
 
-lri = cellstr(char(fread(fid,80))') # Local recording identification
+lri = cellstr(char(fread(fid,80))'); # Local recording identification
 
-sd = cellstr(char(fread(fid,8))') # Startdate of recording
+sd = cellstr(char(fread(fid,8))'); # Startdate of recording
 
-st = cellstr(char(fread(fid,8))') # Starttime of recording
+st = cellstr(char(fread(fid,8))'); # Starttime of recording
 
-nobytes = str2double(deblank(cellstr(char(fread(fid,8))'))) # Number of bytes in header
+nbytes = str2double(deblank(cellstr(char(fread(fid,8))'))); # Number of bytes in header
                                        # record
 
-ver = cellstr(char(fread(fid,44))') # Version of data format
+ver = cellstr(char(fread(fid,44))'); # Version of data format
 
-ndata = str2double(deblank(cellstr(char(fread(fid,8))'))) # Number of data records "-1" if
-                                      # unknown
+ndata = str2double(deblank(cellstr(char(fread(fid,8))'))) # Number of data records "-1" if unknown
 
-dur = str2double(deblank(cellstr(char(fread(fid,8))'))) # Duration of a data record, in
-                                   # seconds
+dur = str2double(deblank(cellstr(char(fread(fid,8))'))) # Duration of a data record, in seconds
 
-N = str2double(deblank(cellstr(char(fread(fid,4))'))) # Number of channels (N) in data
-                                                 # record
+N = str2double(deblank(cellstr(char(fread(fid,4))'))) # Number of
+                                # channels (N) in data record
 
-chnl = cellstr(char(fread(fid,N*16))'); # Labels of the channels
+chnl = cell(N,10);
+for i = 1:N
+  chnl(i,1) = char(fread(fid,16))'; # Labels of the channels
+end
 
-ttype = cellstr(char(fread(fid,N*80))'); # Transducer type
+for i = 1:N
+  chnl(i,2) = char(fread(fid,80))'; # Transducer type
+end
 
-pdim = cellstr(char(fread(fid,N*8))'); # Physical dimension of
-                                        # channels
+for i = 1:N
+  chnl(i,3) = char(fread(fid,8))'; # Physical dimension of channels
+end
 
-pmin = cellstr(char(fread(fid,N*8))'); # Physical minimum in units of
-                                        # physical dimension
+for i = 1:N
+  chnl(i,4) = str2double(deblank(char(fread(fid,8))')); # Physical minimum in units of
+                                   # physical dimension
+end
 
-pmax = cellstr(char(fread(fid,N*8))'); # Physical maximum in units of
-                                       # physical dimension
+for i = 1:N
+  chnl(i,5) = str2double(deblank(char(fread(fid,8))')); # Physical maximum in units of
+                                   # physical dimension
+end
 
-dmin = cellstr(char(fread(fid,N*8))'); # Digital minimum
+for i = 1:N
+  chnl(i,6) = char(fread(fid,8))'; # Digital minimum
+end
 
-dmax = cellstr(char(fread(fid,N*8))'); # Digital maximum
+for i = 1:N
+  chnl(i,7) = char(fread(fid,8))'; # Digital maximum
+end
 
-prefilter = cellstr(char(fread(fid,N*80))'); # Prefiltering
+for i = 1:N
+  chnl(i,8) = char(fread(fid,80))'; # Prefiltering
+end
 
-cellstr(char(fread(fid,(N-1)*8'))'); # Number of samples in each
+for i = 1:N
+  chnl(i,9) = char(fread(fid,8))'; # Number of samples in each
           # data record (Sample-rate if Duration of data record = "1")
+end
 
-nsamp = str2double(deblank(char(fread(fid,8'))'))
+for i = 1:N
+  chnl(i,10) = char(fread(fid,32))'; # Reserved
+end
 
-reserved = cellstr(char(fread(fid,N*32))'); # Reserved
-
-data = fread(fid,[dur*nsamp,N])';
+## data = fread(fid,[dur*nsamp,N])';
