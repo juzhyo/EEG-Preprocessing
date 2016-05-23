@@ -9,3 +9,5 @@ function [y] = downsample(x,m,n)
     interval = floor(m/n);
     y = x(:,1:interval:end);
   end
+
+end

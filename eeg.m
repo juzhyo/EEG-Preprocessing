@@ -3,6 +3,7 @@ addpath('/home/justin/EEG/data/Multi-modal Face Dataset/EEG');
 addpath('/home/justin/EEG/functions');
 
 load('downsample.m')
+load('montage.m')
 
 graphics_toolkit('gnuplot')
 
@@ -90,15 +91,45 @@ end
 nsamp = cellfun(@times,chnl(:,9),{dur}); # Number of samples for each
                                 # electrode; sample rate x duration
 
-## data = cell(N,nsamp);
-
 data = fread(fid,[nsamp(i),N])';
 
 ## Downsampling of data
-data = downsample(data,nsamp,200);
-size(data)
+down_rate = 200;
+data = downsample(data,nsamp,down_rate);
 
-plot(data(1,:))
+## Creating montage and calculating HEOG & VEOG
+[data,heog,veog] = montage(data);
+
+## Plotting the EEG before artifact removal
+[m, n] = size(data);           # m = no. of electrodes, n = no. of
+                               # samples
+
+## Calculating the shifts for plotting
+min_data = min(flipud(data),[],2); # flipud() used to position 1st
+                                     # row at the top of the graph
+max_data = max(flipud(data),[],2);
+shift = flipud(cumsum([0;abs(max_data(1:end-1))+abs(min_data(2:end))]));
+shifted_data = data+shift;    # baseline plot with 1st row
+                              # at the top
+
+## Defining y tick labels
+electrodes = chnl(1:128,1);
+set(gca,'ytick',mean(shifted_data,2),'yticklabel',electrodes);
+title('EEG')
+xlabel('Time(s)') % x-axis label
+ylabel('Channels') % y-axis label
+
+## Plotting the graph
+period = 1/down_rate;
+t = linspace(0,dur,n);
+length(t)
+hold on
+for row = 1:m
+  plot(t,shifted_data(row,:));
+end
+hold off
+
+
 
 ## data = fread(fid,[dur*nsamp,N])';
 
